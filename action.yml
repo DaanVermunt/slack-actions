@@ -4,6 +4,9 @@ inputs:
   channel-to-create:
     description: 'The name of the channel to create'
     required: true
+  bot-oauth-secret:
+    description: 'The name of the channel to create'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
