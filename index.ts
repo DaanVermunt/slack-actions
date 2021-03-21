@@ -14,6 +14,7 @@ const run = async () => {
 
     const prNum = process.env.GITHUB_REF.split('/')[2] // refs/pull/134/merge
 
+    console.log(process.env.GITHUB_REF)
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,

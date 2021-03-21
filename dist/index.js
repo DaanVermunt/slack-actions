@@ -19308,6 +19308,7 @@ const run = async () => {
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
     const prNum = process.env.GITHUB_REF.split('/')[2];
+    console.log(process.env.GITHUB_REF);
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
