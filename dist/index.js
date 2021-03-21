@@ -5908,13 +5908,9 @@ const run = async () => {
             core.setFailed('Unknown slack action');
     }
 };
-try {
-    run()
-        .then(() => core.setOutput('my_fealings', 'YEAH'));
-}
-catch (error) {
-    core.setFailed(error.message);
-}
+run()
+    .then(() => core.setOutput('my_feelings', 'YEAH'))
+    .catch((error) => core.setFailed(error.message));
 
 
 /***/ }),
