@@ -5882,14 +5882,14 @@ function wrappy (fn, cb) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __webpack_require__(186);
 const github = __webpack_require__(438);
-try {
+const run = async () => {
     const actionType = core.getInput('action-type');
     const botOAuthSecret = core.getInput('bot-oauth-secret');
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
     const prNum = process.env.GITHUB_REF.split('/')[2];
-    const branch = octo.pulls.get({
+    const branch = await octo.pulls.get({
         owner: payload.repository.owner.name,
         repo: payload.repository.full_name,
         pull_number: parseInt(prNum),
@@ -5906,6 +5906,10 @@ try {
             console.log(`FAIL`);
             core.setFailed('Unknown slack action');
     }
+};
+try {
+    run()
+        .then(() => core.setOutput('my_fealings', 'YEAH'));
 }
 catch (error) {
     core.setFailed(error.message);
