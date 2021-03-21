@@ -30,6 +30,7 @@ const run = async () => {
 
     const slackClient = new WebClient(botOAuthSecret)
 
+    console.log(channelName)
     switch (actionType) {
         case 'PR_OPEN':
             const newChannelResp = await slackClient.conversations.create({
@@ -45,7 +46,9 @@ const run = async () => {
         case 'PR_CLOSED':
             const listChannelResponse = await slackClient.conversations.list()
             const channels = listChannelResponse.channels as {id: string, name: string}[]
+            console.log(JSON.stringify(channels, undefined, 2))
             const channel = channels.find(ch => ch.name === channelName)
+            console.log(JSON.stringify(channel, undefined, 2))
             await slackClient.conversations.archive({
                 channel: channel.id
             })
