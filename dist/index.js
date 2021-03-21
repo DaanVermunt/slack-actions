@@ -13670,7 +13670,7 @@ const run = async () => {
                         type: "section",
                         text: {
                             type: "mrkdwn",
-                            text: `Post \`/github subscribe ${payload.repository.full_name} messages +label:${prNum}\` in order to get comment messages`,
+                            text: `Post \`/github subscribe ${payload.repository.full_name} comments +label:${prNum}\` in order to get comment messages`,
                         }
                     }],
             });
