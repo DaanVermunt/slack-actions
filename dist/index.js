@@ -19314,10 +19314,10 @@ const run = async () => {
         pull_number: parseInt(prNum),
     };
     const PR = await octo.pulls.get(getPROptions);
-    const base = PR.data.base.ref;
-    const head = PR.data.head.ref;
+    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
+    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
     const date = moment().format('YY-MM-DD');
-    const channelName = `PR ${date}: ${head} -> ${base}`;
+    const channelName = `pr_${date}_${head}_${base}`;
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN':
