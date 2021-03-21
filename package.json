@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p tsconfig.json",
-    "package": "ncc build",
-    "deploy": "npm run build && npm run package"
+    "package": "ncc build index.ts -o dist",
+    "deploy": "npm run package && git commit -am 'new deploy' && git push"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,8 @@
   },
   "homepage": "https://github.com/SyntacticsDevelopment/slack-actions#readme",
   "dependencies": {
-    "@actions/core": "^1.2.6"
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.15",
