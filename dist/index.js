@@ -19316,17 +19316,20 @@ const run = async () => {
     const base = PR.data.base.ref;
     const head = PR.data.head.ref;
     const date = moment().format('YY-MM-DD');
-    const channel = `PR ${date}: ${head} -> ${base}`;
+    const channelName = 'test_channel1' || 0;
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN':
-            console.log(`create channel ${channel}`);
-            console.log(JSON.stringify(channel));
+            console.log(`create channel ${channelName}`);
+            console.log(JSON.stringify(channelName));
             break;
         case 'PR_CLOSED':
-            console.log(`remove/archive channel ${channel}`);
+            console.log(`remove/archive channel ${channelName}`);
+            const listChannelResponse = await slackClient.conversations.list();
+            const channels = listChannelResponse.channels;
+            const channel = channels.find(ch => ch.name === channelName);
             await slackClient.conversations.archive({
-                channel: 'test_channel1' || 0
+                channel: channel.id
             });
             break;
         default:
