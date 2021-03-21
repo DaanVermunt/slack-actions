@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import * as moment from 'moment'
 
 const run = async () => {
     const actionType = core.getInput('action-type');
@@ -11,13 +12,19 @@ const run = async () => {
 
     const prNum = process.env.GITHUB_REF.split('/')[2] // refs/pull/134/merge
 
-    const getBranchOptions = {
+    const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
         pull_number: parseInt(prNum),
     }
-    console.log(getBranchOptions)
-    const branch = await octo.pulls.get(getBranchOptions)
+    const PR = await octo.pulls.get(getPROptions)
+
+    const base = PR.data.base.ref
+    const head = PR.data.head.ref
+
+    const date = moment().format('YY-MM-DD')
+
+    const branch = `PR ${date}: ${head} -> ${base}`
 
     switch (actionType) {
         case 'PR_OPEN':
