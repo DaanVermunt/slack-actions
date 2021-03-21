@@ -1,19 +1,22 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 
 try {
-    // `who-to-greet` input defined in action metadata file
+    const actionType = core.getInput('action-type');
     const botOAuthSecret = core.getInput('bot-oauth-secret');
-    const channel = core.getInput('channel-to-create');
-    console.log(`Hello ${botOAuthSecret}!`);
-    console.log(`Hello ${channel}!`);
-    console.log(`Hello ${channel}!`);
-    const time = (new Date()).toTimeString();
-    core.setOutput("time", time);
-    // Get the JSON webhook payload for the event that triggered the workflow
-    const payload = JSON.stringify(github.context.payload, undefined, 2)
     const branch = process.env.GITHUB_REF.split('/').slice(2).join('/')
-    console.log(`The event payload: ${branch}`);
+
+    switch (actionType) {
+        case 'PR_OPEN':
+            console.log(`create channel ${branch}`)
+            break
+        case 'PR_CLOSE':
+            console.log(`remove/archive channel ${branch}`)
+            break
+        default:
+            console.log(`FAIL`)
+            core.setFailed('Unknown slack action')
+    }
+
 } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error.message)
 }
