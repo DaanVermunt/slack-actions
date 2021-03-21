@@ -19,6 +19,7 @@ const run = async () => {
         repo: payload.repository.name,
         pull_number: parseInt(prNum),
     }
+    console.log(getPROptions)
     const PR = await octo.pulls.get(getPROptions)
 
     const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
@@ -47,7 +48,7 @@ const run = async () => {
             const listChannelResponse = await slackClient.conversations.list()
             const channels = listChannelResponse.channels as {id: string, name: string}[]
             console.log(JSON.stringify(channels, undefined, 2))
-            const channel = channels.find(ch => ch.name === channelName)
+            const channel = channels.find(ch => ch.name.includes(base) && ch.name.includes(head))
             console.log(JSON.stringify(channel, undefined, 2))
             await slackClient.conversations.archive({
                 channel: channel.id
