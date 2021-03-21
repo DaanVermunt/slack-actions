@@ -404,6 +404,8 @@ try {
     const branch = process.env.GITHUB_REF.split('/').slice(2).join('/');
     switch (actionType) {
         case 'PR_OPEN':
+            console.log(`${process.env.GITHUB_REF}`);
+            console.log(`${process.env}`);
             console.log(`create channel ${branch}`);
             break;
         case 'PR_CLOSE':
