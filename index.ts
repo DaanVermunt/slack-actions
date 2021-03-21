@@ -16,7 +16,6 @@ const run = async () => {
         repo: payload.repository.name,
         pull_number: parseInt(prNum),
     }
-    console.log(JSON.stringify(payload))
     console.log(getBranchOptions)
     const branch = await octo.pulls.get(getBranchOptions)
 
