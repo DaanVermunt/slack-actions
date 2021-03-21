@@ -1,3 +1,4 @@
+import { WebClient } from '@slack/web-api'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as moment from 'moment'
@@ -24,16 +25,20 @@ const run = async () => {
 
     const date = moment().format('YY-MM-DD')
 
-    const branch = `PR ${date}: ${head} -> ${base}`
+    const channel = `PR ${date}: ${head} -> ${base}`
+
+    const slackClient = new WebClient(botOAuthSecret)
 
     switch (actionType) {
         case 'PR_OPEN':
-            console.log(`create channel ${branch}`)
-            console.log(JSON.stringify(branch))
+            console.log(`create channel ${channel}`)
+            console.log(JSON.stringify(channel))
             break
         case 'PR_CLOSED':
-            console.log(`remove/archive channel ${branch}`)
-            console.log(JSON.stringify(branch))
+            console.log(`remove/archive channel ${channel}`)
+            await slackClient.conversations.archive({
+                channel: 'test_channel1' || channel
+            })
             break
         default:
             console.log(`FAIL`)
