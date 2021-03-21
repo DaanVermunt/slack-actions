@@ -1,8 +1,13 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 
 try {
     const actionType = core.getInput('action-type');
     const botOAuthSecret = core.getInput('bot-oauth-secret');
+
+    const githubToken = core.getInput('github-token');
+    const octo = github.getOctokit(githubToken)
+
     const branch = process.env.GITHUB_REF.split('/').slice(2).join('/')
 
     switch (actionType) {
