@@ -5891,7 +5891,7 @@ const run = async () => {
     const prNum = process.env.GITHUB_REF.split('/')[2];
     const getBranchOptions = {
         owner: payload.repository.owner.login,
-        repo: payload.repository.full_name,
+        repo: payload.repository.name,
         pull_number: parseInt(prNum),
     };
     console.log(JSON.stringify(payload));
