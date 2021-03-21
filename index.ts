@@ -4,10 +4,11 @@ import * as github from '@actions/github'
 import * as moment from 'moment'
 
 const run = async () => {
-    const actionType = core.getInput('action-type');
-    const botOAuthSecret = core.getInput('bot-oauth-secret');
+    const actionType = core.getInput('action-type')
+    const botOAuthSecret = core.getInput('bot-oauth-secret')
+    const userIds = core.getInput('slack-user-ids') || ''
 
-    const githubToken = core.getInput('github-token');
+    const githubToken = core.getInput('github-token')
     const payload = github.context.payload
     const octo = github.getOctokit(githubToken)
 
@@ -25,17 +26,23 @@ const run = async () => {
 
     const date = moment().format('YY-MM-DD')
 
-    const channelName = 'test_channel1' || `PR ${date}: ${head} -> ${base}`
+    const channelName = `PR ${date}: ${head} -> ${base}`
 
     const slackClient = new WebClient(botOAuthSecret)
 
     switch (actionType) {
         case 'PR_OPEN':
-            console.log(`create channel ${channelName}`)
-            console.log(JSON.stringify(channelName))
+            const newChannelResp = await slackClient.conversations.create({
+                name: channelName,
+                is_private: false,
+            })
+            const newChannel = newChannelResp.channel as { id: string }
+            await slackClient.conversations.invite({
+                channel: newChannel.id,
+                users: userIds,
+            })
             break
         case 'PR_CLOSED':
-            console.log(`remove/archive channel ${channelName}`)
             const listChannelResponse = await slackClient.conversations.list()
             const channels = listChannelResponse.channels as {id: string, name: string}[]
             const channel = channels.find(ch => ch.name === channelName)

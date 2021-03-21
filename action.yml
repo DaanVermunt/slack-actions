@@ -10,6 +10,9 @@ inputs:
   github-token:
     description: 'The GITHUB_SECRET OAuth secret'
     required: true
+  slack-user-ids:
+    description: 'The user ids to add to the channel, if empty no one will be added'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

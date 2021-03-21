@@ -19303,6 +19303,7 @@ const moment = __webpack_require__(9623);
 const run = async () => {
     const actionType = core.getInput('action-type');
     const botOAuthSecret = core.getInput('bot-oauth-secret');
+    const userIds = core.getInput('slack-user-ids') || '';
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
@@ -19316,15 +19317,21 @@ const run = async () => {
     const base = PR.data.base.ref;
     const head = PR.data.head.ref;
     const date = moment().format('YY-MM-DD');
-    const channelName = 'test_channel1' || 0;
+    const channelName = `PR ${date}: ${head} -> ${base}`;
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN':
-            console.log(`create channel ${channelName}`);
-            console.log(JSON.stringify(channelName));
+            const newChannelResp = await slackClient.conversations.create({
+                name: channelName,
+                is_private: false,
+            });
+            const newChannel = newChannelResp.channel;
+            await slackClient.conversations.invite({
+                channel: newChannel.id,
+                users: userIds,
+            });
             break;
         case 'PR_CLOSED':
-            console.log(`remove/archive channel ${channelName}`);
             const listChannelResponse = await slackClient.conversations.list();
             const channels = listChannelResponse.channels;
             const channel = channels.find(ch => ch.name === channelName);
