@@ -25,7 +25,7 @@ const run = async () => {
             console.log(`create channel ${branch}`)
             console.log(JSON.stringify(branch))
             break
-        case 'PR_CLOSE':
+        case 'PR_CLOSED':
             console.log(`remove/archive channel ${branch}`)
             console.log(JSON.stringify(branch))
             break
