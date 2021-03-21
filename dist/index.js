@@ -13641,29 +13641,19 @@ const run = async () => {
         repo: payload.repository.name,
         pull_number: parseInt(prNum),
     };
-    console.log(getPROptions);
     const PR = await octo.pulls.get(getPROptions);
     const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
     const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
-    const channelName = `pr_${head}_${base}`;
+    const channelName = `pr_${prNum}_${head}_${base}`;
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
-    console.log(channelName);
     switch (actionType) {
         case 'PR_OPEN':
             let newChannel;
-            try {
-                const newChannelResp = await slackClient.conversations.create({
-                    name: channelName,
-                    is_private: false,
-                });
-                newChannel = newChannelResp.channel;
-            }
-            catch (e) {
-                newChannel = await findChannel(slackClient, channelName);
-                await slackClient.conversations.unarchive({
-                    channel: newChannel.id
-                });
-            }
+            const newChannelResp = await slackClient.conversations.create({
+                name: channelName,
+                is_private: false,
+            });
+            newChannel = newChannelResp.channel;
             await slackClient.conversations.invite({
                 channel: newChannel.id,
                 users: userIds,
