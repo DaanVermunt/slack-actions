@@ -19,12 +19,12 @@ const run = async () => {
     const payload = github.context.payload
     const octo = github.getOctokit(githubToken)
 
-    const prNum = process.env.GITHUB_REF.split('/')[2] // refs/pull/134/merge
+    const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]) // refs/pull/134/merge
 
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
-        pull_number: parseInt(prNum),
+        pull_number: prNum,
     }
     const PR = await octo.pulls.get(getPROptions)
 
@@ -37,13 +37,18 @@ const run = async () => {
 
     switch (actionType) {
         case 'PR_OPEN':
-            let newChannel: {id: string}
+            await octo.issues.addLabels({
+                owner: payload.repository.owner.login,
+                repo: payload.repository.name,
+                issue_number: prNum,
+                labels: [`${prNum}`],
+            })
 
             const newChannelResp = await slackClient.conversations.create({
                 name: channelName,
                 is_private: false,
             })
-            newChannel = newChannelResp.channel as { id: string }
+            const newChannel = newChannelResp.channel as { id: string }
 
             await slackClient.conversations.invite({
                 channel: newChannel.id,

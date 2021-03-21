@@ -13635,11 +13635,11 @@ const run = async () => {
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
-    const prNum = process.env.GITHUB_REF.split('/')[2];
+    const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]);
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
-        pull_number: parseInt(prNum),
+        pull_number: prNum,
     };
     const PR = await octo.pulls.get(getPROptions);
     const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
@@ -13648,12 +13648,17 @@ const run = async () => {
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN':
-            let newChannel;
+            await octo.issues.addLabels({
+                owner: payload.repository.owner.login,
+                repo: payload.repository.name,
+                issue_number: prNum,
+                labels: [`${prNum}`],
+            });
             const newChannelResp = await slackClient.conversations.create({
                 name: channelName,
                 is_private: false,
             });
-            newChannel = newChannelResp.channel;
+            const newChannel = newChannelResp.channel;
             await slackClient.conversations.invite({
                 channel: newChannel.id,
                 users: userIds,
