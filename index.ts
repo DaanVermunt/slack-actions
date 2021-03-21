@@ -24,6 +24,7 @@ const run = async () => {
             break
         case 'PR_CLOSE':
             console.log(`remove/archive channel ${branch}`)
+            console.log(JSON.stringify(branch))
             break
         default:
             console.log(`FAIL`)
