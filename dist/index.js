@@ -5889,11 +5889,14 @@ const run = async () => {
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
     const prNum = process.env.GITHUB_REF.split('/')[2];
-    const branch = await octo.pulls.get({
-        owner: payload.repository.owner.name,
+    const getBranchOptions = {
+        owner: payload.repository.owner.login,
         repo: payload.repository.full_name,
         pull_number: parseInt(prNum),
-    });
+    };
+    console.log(JSON.stringify(payload));
+    console.log(getBranchOptions);
+    const branch = await octo.pulls.get(getBranchOptions);
     switch (actionType) {
         case 'PR_OPEN':
             console.log(`create channel ${branch}`);
