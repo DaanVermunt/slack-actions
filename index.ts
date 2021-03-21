@@ -54,6 +54,18 @@ const run = async () => {
                 channel: newChannel.id,
                 users: userIds,
             })
+            await slackClient.chat.postMessage({
+                channel: newChannel.id,
+                text: '',
+                blocks: [{
+                            type: "section",
+                            text: {
+                                type: "mrkdwn",
+                                text: `Post \`/github subscribe ${payload.repository.full_name} messages +label:${prNum}\` in order to get comment messages`,
+                            }
+                        }],
+            })
+
             break
         case 'PR_CLOSED':
             const channel = await findChannel(slackClient, channelName)
