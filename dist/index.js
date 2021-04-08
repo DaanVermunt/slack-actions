@@ -13643,19 +13643,18 @@ const run = async () => {
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
     const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]);
-    console.log(prNum);
-    const getPROptions = {
-        owner: payload.repository.owner.login,
-        repo: payload.repository.name,
-        pull_number: prNum,
-    };
-    const PR = await octo.pulls.get(getPROptions);
-    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
-    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
-    const channelName = `pr_${prNum}_${head}_${base}`;
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN':
+            const getPROptions = {
+                owner: payload.repository.owner.login,
+                repo: payload.repository.name,
+                pull_number: prNum,
+            };
+            const PR = await octo.pulls.get(getPROptions);
+            const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
+            const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase();
+            const channelName = `pr_${prNum}_${head}_${base}`;
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
@@ -13684,7 +13683,7 @@ const run = async () => {
             });
             break;
         case 'PR_CLOSED':
-            const channel = await findChannel(slackClient, channelName);
+            const channel = await findChannel(slackClient, `${prNum}`);
             await slackClient.conversations.archive({
                 channel: channel.id
             });

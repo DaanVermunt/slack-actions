@@ -16,11 +16,8 @@ const findChannel = async (client: WebClient, name: string) => {
 
 const run = async () => {
     const actionType = core.getInput('action-type')
-    console.log(actionType)
     const botOAuthSecret = core.getInput('bot-oauth-secret')
-    console.log(botOAuthSecret)
     const userIds = core.getInput('slack-user-ids') || ''
-    console.log(userIds)
 
     const githubToken = core.getInput('github-token')
     const payload = github.context.payload
@@ -28,23 +25,22 @@ const run = async () => {
 
     const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]) // refs/pull/134/merge
 
-    console.log(prNum)
-    const getPROptions = {
-        owner: payload.repository.owner.login,
-        repo: payload.repository.name,
-        pull_number: prNum,
-    }
-    const PR = await octo.pulls.get(getPROptions)
-
-    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
-    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
-
-    const channelName = `pr_${prNum}_${head}_${base}`
-
     const slackClient = new WebClient(botOAuthSecret)
-
     switch (actionType) {
         case 'PR_OPEN':
+
+            const getPROptions = {
+                owner: payload.repository.owner.login,
+                repo: payload.repository.name,
+                pull_number: prNum,
+            }
+            const PR = await octo.pulls.get(getPROptions)
+
+            const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
+            const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
+
+            const channelName = `pr_${prNum}_${head}_${base}`
+
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
@@ -76,7 +72,7 @@ const run = async () => {
 
             break
         case 'PR_CLOSED':
-            const channel = await findChannel(slackClient, channelName)
+            const channel = await findChannel(slackClient, `${prNum}`)
             await slackClient.conversations.archive({
                 channel: channel.id
             })
