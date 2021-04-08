@@ -3,14 +3,10 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
-    console.log(name)
     const listChannelResponse = await client.conversations.list()
-    console.log(listChannelResponse)
     const channels = listChannelResponse.channels as {id: string, name: string}[]
-    console.log(channels)
     const channel = channels.find(ch => ch.name === name)
 
-    console.log(channel, name, channels)
     return channel as {id: string; name: string}
 }
 
@@ -23,12 +19,12 @@ const run = async () => {
     const payload = github.context.payload
     const octo = github.getOctokit(githubToken)
 
-    const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]) // refs/pull/134/merge
-
+    console.log(payload)
     const slackClient = new WebClient(botOAuthSecret)
+
     switch (actionType) {
         case 'PR_OPEN':
-
+            const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]) // refs/pull/134/merge
             const getPROptions = {
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
