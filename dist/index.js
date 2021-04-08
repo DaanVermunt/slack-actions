@@ -13626,6 +13626,7 @@ const findChannel = async (client, name) => {
     const listChannelResponse = await client.conversations.list();
     const channels = listChannelResponse.channels;
     const channel = channels.find(ch => ch.name === name);
+    console.log(channel, name, channels);
     return channel;
 };
 const run = async () => {

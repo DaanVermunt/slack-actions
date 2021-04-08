@@ -7,6 +7,7 @@ const findChannel = async (client: WebClient, name: string) => {
     const channels = listChannelResponse.channels as {id: string, name: string}[]
     const channel = channels.find(ch => ch.name === name)
 
+    console.log(channel, name, channels)
     return channel as {id: string; name: string}
 }
 
