@@ -13634,12 +13634,16 @@ const findChannel = async (client, name) => {
 };
 const run = async () => {
     const actionType = core.getInput('action-type');
+    console.log(actionType);
     const botOAuthSecret = core.getInput('bot-oauth-secret');
+    console.log(botOAuthSecret);
     const userIds = core.getInput('slack-user-ids') || '';
+    console.log(userIds);
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
     const prNum = parseInt(process.env.GITHUB_REF.split('/')[2]);
+    console.log(prNum);
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
