@@ -3,11 +3,11 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
-    const listChannelResponse = await client.conversations.list()
-    const channels = listChannelResponse.channels as {id: string, name: string}[]
+    const listChannelResponse = await client.conversations.list({limit: 1000})
+    const channels = listChannelResponse.channels as { id: string, name: string }[]
     const channel = channels.find(ch => ch.name === name)
 
-    return channel as {id: string; name: string}
+    return channel as { id: string; name: string }
 }
 
 const run = async () => {
@@ -27,8 +27,8 @@ const run = async () => {
     }
     const PR = await octo.pulls.get(getPROptions)
 
-    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
-    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, "").replace(/ +/g, "-").toLowerCase()
+    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
+    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
 
     const channelName = `pr_${prNum}_${head}_${base}`
     const slackClient = new WebClient(botOAuthSecret)
@@ -57,19 +57,19 @@ const run = async () => {
                 channel: newChannel.id,
                 text: '',
                 blocks: [{
-                            type: "section",
-                            text: {
-                                type: "mrkdwn",
-                                text: `Post \`/github subscribe ${payload.repository.full_name} comments +label:${prNum}\` in order to get comment messages`,
-                            }
-                        }],
+                    type: 'section',
+                    text: {
+                        type: 'mrkdwn',
+                        text: `Post \`/github subscribe ${payload.repository.full_name} comments +label:${prNum}\` in order to get comment messages`,
+                    },
+                }],
             })
 
             break
         case 'PR_CLOSED':
             const channel = await findChannel(slackClient, channelName)
             await slackClient.conversations.archive({
-                channel: channel.id
+                channel: channel.id,
             })
             break
         default:
