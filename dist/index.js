@@ -13625,7 +13625,6 @@ const github = __webpack_require__(5438);
 const findChannel = async (client, name) => {
     const listChannelResponse = await client.conversations.list({ limit: 1000 });
     const channels = listChannelResponse.channels;
-    console.log(channels.length);
     const channel = channels.find(ch => ch.name === name);
     return channel;
 };
