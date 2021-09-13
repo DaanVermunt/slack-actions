@@ -55,10 +55,10 @@ const getCommitMessages = async (octo: any, payload: any): Promise<string[]> => 
     return commits.data.map(com => com.commit.message)
 }
 
-const getMessagesToSend = (messages: string[]) => {
+const getMessagesToSend = (messages: string[], lookForLastDeploy = false) => {
     // REMOVE FIRST (WHICH IS BUMP)
     const items = messages.slice(1)
-    const nextIdx = items.findIndex(m => isBumpVersion(m))
+    const nextIdx = items.findIndex((m) => lookForLastDeploy ? isLastDeploy(m) : isBumpVersion(m))
 
     // THEN CREATE LIST UP TO NEXT BUMP
     return items.slice(0, nextIdx)
@@ -67,6 +67,13 @@ const getMessagesToSend = (messages: string[]) => {
 const isBumpVersion = (message: any) => {
     if (typeof message === 'string') {
         return message.toLowerCase().includes('bump version')
+    }
+    return false
+}
+
+const isLastDeploy = (message: any) => {
+    if (typeof message === 'string') {
+        return message.toLowerCase().includes('set last deploy')
     }
     return false
 }
@@ -163,12 +170,15 @@ const run = async () => {
             break
 
         case 'DEPLOY_PRODUCTION':
-            if (!isBumpVersion(payload?.commits?.[0]?.message)) {
+            if (!isLastDeploy(payload?.commits?.[0]?.message)) {
                 return
             }
+
             const messagesProd = await getCommitMessages(octo, payload)
-            const messagesToSendProd = getMessagesToSend(messagesProd)
+            const messagesToSendProd = getMessagesToSend(messagesProd, true)
+
             const deployStagingProd = await findChannel(slackClient, 'keywi-deployments')
+
             await postMessages(messagesToSendProd, slackClient, deployStagingProd)
             break
     }

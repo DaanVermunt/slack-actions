@@ -13980,14 +13980,20 @@ const getCommitMessages = async (octo, payload) => {
     });
     return commits.data.map(com => com.commit.message);
 };
-const getMessagesToSend = (messages) => {
+const getMessagesToSend = (messages, lookForLastDeploy = false) => {
     const items = messages.slice(1);
-    const nextIdx = items.findIndex(m => isBumpVersion(m));
+    const nextIdx = items.findIndex((m) => lookForLastDeploy ? isLastDeploy(m) : isBumpVersion(m));
     return items.slice(0, nextIdx);
 };
 const isBumpVersion = (message) => {
     if (typeof message === 'string') {
         return message.toLowerCase().includes('bump version');
+    }
+    return false;
+};
+const isLastDeploy = (message) => {
+    if (typeof message === 'string') {
+        return message.toLowerCase().includes('set last deploy');
     }
     return false;
 };
@@ -14074,11 +14080,11 @@ const run = async () => {
             await postMessages(messagesToSend, slackClient, deployStaging);
             break;
         case 'DEPLOY_PRODUCTION':
-            if (!isBumpVersion((_d = (_c = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.message)) {
+            if (!isLastDeploy((_d = (_c = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.message)) {
                 return;
             }
             const messagesProd = await getCommitMessages(octo, payload);
-            const messagesToSendProd = getMessagesToSend(messagesProd);
+            const messagesToSendProd = getMessagesToSend(messagesProd, true);
             const deployStagingProd = await findChannel(slackClient, 'keywi-deployments');
             await postMessages(messagesToSendProd, slackClient, deployStagingProd);
             break;
