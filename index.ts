@@ -42,7 +42,7 @@ const getCommitMessages = async (octo: any, payload: any) => {
 const isBumpVersion = (payload: any) => {
     const message = payload?.commits?.[0]?.message
     if (typeof message === 'string') {
-        return message.toLowerCase().includes('change job') || message.toLowerCase().includes('bump version')
+        return message.toLowerCase().includes('test') || message.toLowerCase().includes('bump version')
     }
     return false
 }

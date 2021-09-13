@@ -13982,7 +13982,7 @@ const isBumpVersion = (payload) => {
     var _a, _b;
     const message = (_b = (_a = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message;
     if (typeof message === 'string') {
-        return message.toLowerCase().includes('change job') || message.toLowerCase().includes('bump version');
+        return message.toLowerCase().includes('test') || message.toLowerCase().includes('bump version');
     }
     return false;
 };
