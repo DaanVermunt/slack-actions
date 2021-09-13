@@ -72,6 +72,11 @@ const run = async () => {
                 channel: channel.id,
             })
             break
+
+        case 'DEPLOY_STAGING':
+            const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
+            console.log('TEST DEPLOY STAGING')
+        case 'DEPLOY_PRODUCTION':
         default:
             console.log(`FAIL`)
             core.setFailed('Unknown slack action')
