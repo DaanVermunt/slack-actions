@@ -13972,7 +13972,19 @@ const getPRdata = async (octo, payload) => {
     return `pr_${prNum}_${head}_${base}`;
 };
 const getCommitMessages = async (octo, payload) => {
-    console.log(payload);
+    const commits = await octo.request('GET /repos/{owner}/{repo}/commits', {
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+    });
+    console.log(commits);
+};
+const isBumpVersion = (payload) => {
+    var _a, _b;
+    const message = (_b = (_a = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message;
+    if (typeof message === 'string') {
+        return message.toLowerCase().includes('change job') || message.toLowerCase().includes('bump version');
+    }
+    return false;
 };
 const run = async () => {
     const actionType = core.getInput('action-type');
@@ -14025,6 +14037,9 @@ const run = async () => {
             });
             break;
         case 'DEPLOY_STAGING':
+            if (!isBumpVersion(payload)) {
+                return;
+            }
             await getCommitMessages(octo, payload);
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
         case 'DEPLOY_PRODUCTION':

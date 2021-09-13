@@ -32,7 +32,19 @@ const getPRdata = async (octo: any, payload: any) => {
 }
 
 const getCommitMessages = async (octo: any, payload: any) => {
-    console.log(payload)
+    const commits = await octo.request('GET /repos/{owner}/{repo}/commits', {
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+    })
+    console.log(commits)
+}
+
+const isBumpVersion = (payload: any) => {
+    const message = payload?.commits?.[0]?.message
+    if (typeof message === 'string') {
+        return message.toLowerCase().includes('change job') || message.toLowerCase().includes('bump version')
+    }
+    return false
 }
 
 const run = async () => {
@@ -94,6 +106,9 @@ const run = async () => {
             break
 
         case 'DEPLOY_STAGING':
+            if (!isBumpVersion(payload)) {
+                return
+            }
             await getCommitMessages(octo, payload)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
         case 'DEPLOY_PRODUCTION':
