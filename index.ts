@@ -32,11 +32,11 @@ const getPRdata = async (octo: any, payload: any) => {
 }
 
 const getCommitMessages = async (octo: any, payload: any) => {
-    console.log(payload)
+    console.log(payload.ref.split('/')[2])
     const commits: { data: Array<{ commit: any }> } = await octo.request('GET /repos/{owner}/{repo}/commits', {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
-        sha: 'test-branch'
+        sha: payload.ref.split('/')[2]
     })
     console.log(commits.data.map(com => com.commit))
 }

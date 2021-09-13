@@ -13972,11 +13972,11 @@ const getPRdata = async (octo, payload) => {
     return `pr_${prNum}_${head}_${base}`;
 };
 const getCommitMessages = async (octo, payload) => {
-    console.log(payload);
+    console.log(payload.ref.split('/')[2]);
     const commits = await octo.request('GET /repos/{owner}/{repo}/commits', {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
-        sha: 'test-branch'
+        sha: payload.ref.split('/')[2]
     });
     console.log(commits.data.map(com => com.commit));
 };
