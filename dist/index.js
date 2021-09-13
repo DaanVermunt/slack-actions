@@ -13962,7 +13962,7 @@ const run = async () => {
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
-    console.log(payload);
+    console.log('1');
     const prNum = payload.number;
     const getPROptions = {
         owner: payload.repository.owner.login,
@@ -13970,10 +13970,12 @@ const run = async () => {
         pull_number: prNum,
     };
     const PR = await octo.pulls.get(getPROptions);
+    console.log('2');
     const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase();
     const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase();
     const channelName = `pr_${prNum}_${head}_${base}`;
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
+    console.log('3');
     switch (actionType) {
         case 'PR_OPEN':
             await octo.issues.addLabels({
@@ -14010,6 +14012,7 @@ const run = async () => {
             });
             break;
         case 'DEPLOY_STAGING':
+            console.log('4');
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
             console.log('TEST DEPLOY STAGING');
         case 'DEPLOY_PRODUCTION':
