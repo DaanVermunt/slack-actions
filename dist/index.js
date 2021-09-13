@@ -13972,23 +13972,40 @@ const getPRdata = async (octo, payload) => {
     return `pr_${prNum}_${head}_${base}`;
 };
 const getCommitMessages = async (octo, payload) => {
-    console.log(payload.ref.split('/')[2]);
     const commits = await octo.request('GET /repos/{owner}/{repo}/commits', {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
-        sha: payload.ref.split('/')[2]
+        sha: payload.ref.split('/')[2],
+        per_page: 100,
     });
-    console.log(commits.data.map(com => com.commit));
+    return commits.data.map(com => com.commit.message);
 };
-const isBumpVersion = (payload) => {
-    var _a, _b;
-    const message = (_b = (_a = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message;
+const getMessagesToSend = (messages) => {
+    const items = messages.slice(1);
+    const nextIdx = items.findIndex(m => isBumpVersion(m));
+    return items.slice(0, nextIdx);
+};
+const isBumpVersion = (message) => {
     if (typeof message === 'string') {
         return message.toLowerCase().includes('test') || message.toLowerCase().includes('bump version');
     }
     return false;
 };
+const postMessages = async (messages, client, channel) => {
+    await client.chat.postMessage({
+        channel: channel.id,
+        text: '',
+        blocks: messages.map(m => ({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: m,
+            },
+        })),
+    });
+};
 const run = async () => {
+    var _a, _b, _c, _d;
     const actionType = core.getInput('action-type');
     const botOAuthSecret = core.getInput('bot-oauth-secret');
     const userIds = core.getInput('slack-user-ids') || '';
@@ -14039,12 +14056,23 @@ const run = async () => {
             });
             break;
         case 'DEPLOY_STAGING':
-            if (!isBumpVersion(payload)) {
+            if (!isBumpVersion((_b = (_a = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message)) {
                 return;
             }
-            await getCommitMessages(octo, payload);
+            const messages = await getCommitMessages(octo, payload);
+            const messagesToSend = getMessagesToSend(messages);
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
+            await postMessages(messagesToSend, slackClient, deployStaging);
+            break;
         case 'DEPLOY_PRODUCTION':
+            if (!isBumpVersion((_d = (_c = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.message)) {
+                return;
+            }
+            const messagesProd = await getCommitMessages(octo, payload);
+            const messagesToSendProd = getMessagesToSend(messagesProd);
+            const deployStagingProd = await findChannel(slackClient, 'keywi-deployments');
+            await postMessages(messagesToSendProd, slackClient, deployStagingProd);
+            break;
     }
 };
 run()

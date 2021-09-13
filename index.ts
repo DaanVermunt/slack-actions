@@ -31,22 +31,58 @@ const getPRdata = async (octo: any, payload: any) => {
     return `pr_${prNum}_${head}_${base}`
 }
 
-const getCommitMessages = async (octo: any, payload: any) => {
-    console.log(payload.ref.split('/')[2])
-    const commits: { data: Array<{ commit: any }> } = await octo.request('GET /repos/{owner}/{repo}/commits', {
-        owner: payload.repository.owner.login,
-        repo: payload.repository.name,
-        sha: payload.ref.split('/')[2]
-    })
-    console.log(commits.data.map(com => com.commit))
+interface Commit {
+    author: {
+        name: string,
+        email: string,
+        date: string,
+    },
+    committer: {
+        name: string,
+        email: string,
+        date: string,
+    },
+    message: string
 }
 
-const isBumpVersion = (payload: any) => {
-    const message = payload?.commits?.[0]?.message
+const getCommitMessages = async (octo: any, payload: any): Promise<string[]> => {
+    const commits: { data: Array<{ commit: Commit }> } = await octo.request('GET /repos/{owner}/{repo}/commits', {
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        sha: payload.ref.split('/')[2],
+        per_page: 100,
+    })
+    return commits.data.map(com => com.commit.message)
+}
+
+const getMessagesToSend = (messages: string[]) => {
+    // REMOVE FIRST (WHICH IS BUMP)
+    const items = messages.slice(1)
+    const nextIdx = items.findIndex(m => isBumpVersion(m))
+
+    // THEN CREATE LIST UP TO NEXT BUMP
+    return items.slice(0, nextIdx)
+}
+
+const isBumpVersion = (message: any) => {
     if (typeof message === 'string') {
         return message.toLowerCase().includes('test') || message.toLowerCase().includes('bump version')
     }
     return false
+}
+
+const postMessages = async (messages: string[], client: any, channel: { id: string; name: string }) => {
+    await client.chat.postMessage({
+        channel: channel.id,
+        text: '',
+        blocks: messages.map(m => ({
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: m,
+            },
+        })),
+    })
 }
 
 const run = async () => {
@@ -108,12 +144,24 @@ const run = async () => {
             break
 
         case 'DEPLOY_STAGING':
-            if (!isBumpVersion(payload)) {
+            if (!isBumpVersion(payload?.commits?.[0]?.message)) {
                 return
             }
-            await getCommitMessages(octo, payload)
+            const messages = await getCommitMessages(octo, payload)
+            const messagesToSend = getMessagesToSend(messages)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
+            await postMessages(messagesToSend, slackClient, deployStaging)
+            break
+
         case 'DEPLOY_PRODUCTION':
+            if (!isBumpVersion(payload?.commits?.[0]?.message)) {
+                return
+            }
+            const messagesProd = await getCommitMessages(octo, payload)
+            const messagesToSendProd = getMessagesToSend(messagesProd)
+            const deployStagingProd = await findChannel(slackClient, 'keywi-deployments')
+            await postMessages(messagesToSendProd, slackClient, deployStagingProd)
+            break
     }
 }
 
