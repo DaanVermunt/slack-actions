@@ -13962,6 +13962,7 @@ const run = async () => {
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
+    console.log(payload);
     const prNum = payload.number;
     const getPROptions = {
         owner: payload.repository.owner.login,
