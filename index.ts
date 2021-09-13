@@ -10,6 +10,31 @@ const findChannel = async (client: WebClient, name: string) => {
     return channel as { id: string; name: string }
 }
 
+const ActionTypes = ['PR_OPEN' , 'PR_CLOSED' , 'DEPLOY_STAGING' , 'DEPLOY_PRODUCTION'] as const
+type ActionType = typeof ActionTypes[number]
+
+const isActionType = (str: string): str is ActionType => {
+    return ActionTypes.some(val => val === str)
+}
+
+const getPRdata = async (octo: any, payload: any) => {
+    const prNum = payload.number
+    const getPROptions = {
+        owner: payload.repository.owner.login,
+        repo: payload.repository.name,
+        pull_number: prNum,
+    }
+    const PR = await octo.pulls.get(getPROptions)
+
+    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
+    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
+    return `pr_${prNum}_${head}_${base}`
+}
+
+const getCommitMessages = async (octo: any, payload: any) => {
+    console.log(payload)
+}
+
 const run = async () => {
     const actionType = core.getInput('action-type')
     const botOAuthSecret = core.getInput('bot-oauth-secret')
@@ -19,27 +44,17 @@ const run = async () => {
     const payload = github.context.payload
     const octo = github.getOctokit(githubToken)
 
-    console.log('1')
+    if (!isActionType(actionType)) {
+        core.setFailed('Unknown slack action')
+        return
+    }
 
     const prNum = payload.number
-    const getPROptions = {
-        owner: payload.repository.owner.login,
-        repo: payload.repository.name,
-        pull_number: prNum,
-    }
-    const PR = await octo.pulls.get(getPROptions)
-
-    console.log('2')
-    const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
-    const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
-
-    const channelName = `pr_${prNum}_${head}_${base}`
     const slackClient = new WebClient(botOAuthSecret)
 
-    console.log('3')
     switch (actionType) {
         case 'PR_OPEN':
-
+            const channelName = await getPRdata(octo, payload)
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
@@ -71,20 +86,17 @@ const run = async () => {
 
             break
         case 'PR_CLOSED':
-            const channel = await findChannel(slackClient, channelName)
+            const channelName2 = await getPRdata(octo, payload)
+            const channel = await findChannel(slackClient, channelName2)
             await slackClient.conversations.archive({
                 channel: channel.id,
             })
             break
 
         case 'DEPLOY_STAGING':
-            console.log('4')
+            await getCommitMessages(octo, payload)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
-            console.log('TEST DEPLOY STAGING')
         case 'DEPLOY_PRODUCTION':
-        default:
-            console.log(`FAIL`)
-            core.setFailed('Unknown slack action')
     }
 }
 
