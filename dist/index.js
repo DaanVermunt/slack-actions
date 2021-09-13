@@ -13976,7 +13976,7 @@ const getCommitMessages = async (octo, payload) => {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
     });
-    console.log(commits);
+    console.log(commits.data.map(com => com.commit));
 };
 const isBumpVersion = (payload) => {
     var _a, _b;

@@ -10,7 +10,7 @@ const findChannel = async (client: WebClient, name: string) => {
     return channel as { id: string; name: string }
 }
 
-const ActionTypes = ['PR_OPEN' , 'PR_CLOSED' , 'DEPLOY_STAGING' , 'DEPLOY_PRODUCTION'] as const
+const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'DEPLOY_STAGING', 'DEPLOY_PRODUCTION'] as const
 type ActionType = typeof ActionTypes[number]
 
 const isActionType = (str: string): str is ActionType => {
@@ -32,11 +32,11 @@ const getPRdata = async (octo: any, payload: any) => {
 }
 
 const getCommitMessages = async (octo: any, payload: any) => {
-    const commits = await octo.request('GET /repos/{owner}/{repo}/commits', {
+    const commits: { data: Array<{ commit: any }> } = await octo.request('GET /repos/{owner}/{repo}/commits', {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
     })
-    console.log(commits)
+    console.log(commits.data.map(com => com.commit))
 }
 
 const isBumpVersion = (payload: any) => {
