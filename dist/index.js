@@ -13987,7 +13987,7 @@ const getMessagesToSend = (messages) => {
 };
 const isBumpVersion = (message) => {
     if (typeof message === 'string') {
-        return message.toLowerCase().includes('test') || message.toLowerCase().includes('bump version');
+        return message.toLowerCase().includes('bump version');
     }
     return false;
 };
@@ -13995,13 +13995,22 @@ const postMessages = async (messages, client, channel) => {
     await client.chat.postMessage({
         channel: channel.id,
         text: '',
-        blocks: messages.map(m => ({
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: m,
+        blocks: [
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
+                }
             },
-        })),
+            ...messages.map(m => ({
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `- ${m}`,
+                },
+            })),
+        ],
     });
 };
 const run = async () => {
