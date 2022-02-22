@@ -13951,6 +13951,7 @@ const core = __webpack_require__(2186);
 const github = __webpack_require__(5438);
 const findChannel = async (client, name) => {
     const listChannelResponse = await client.conversations.list();
+    console.log(listChannelResponse);
     const channels = listChannelResponse.channels;
     const channel = channels.find(ch => ch.name === name);
     console.log(channel);
@@ -14090,7 +14091,10 @@ const run = async () => {
 };
 run()
     .then(() => core.setOutput('my_feelings', 'YEAH'))
-    .catch((error) => core.setFailed(error.message));
+    .catch((error) => {
+    console.error(error);
+    core.setFailed(error.message);
+});
 
 
 /***/ }),

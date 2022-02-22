@@ -4,6 +4,7 @@ import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
     const listChannelResponse = await client.conversations.list()
+    console.log(listChannelResponse)
     const channels = listChannelResponse.channels as { id: string, name: string }[]
     const channel = channels.find(ch => ch.name === name)
 
@@ -191,4 +192,7 @@ const run = async () => {
 
 run()
     .then(() => core.setOutput('my_feelings', 'YEAH'))
-    .catch((error) => core.setFailed(error.message))
+    .catch((error) => {
+        console.error(error)
+        core.setFailed(error.message)
+    })
