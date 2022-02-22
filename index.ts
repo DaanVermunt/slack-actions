@@ -66,7 +66,7 @@ const getMessagesToSend = (messages: string[], lookForLastDeploy = false) => {
 
 const isBumpVersion = (message: any) => {
     if (typeof message === 'string') {
-        return message.toLowerCase().includes('bump version')
+        return message.toLowerCase().includes('bump version') || message.toLowerCase().includes('updated version')
     }
     return false
 }
