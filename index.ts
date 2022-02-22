@@ -3,8 +3,11 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
+    console.log('FIND CHANNEL')
     const listChannelResponse = await client.conversations.list({limit: 1000})
+    console.log(listChannelResponse)
     const channels = listChannelResponse.channels as { id: string, name: string }[]
+    console.log(channels)
     const channel = channels.find(ch => ch.name === name)
 
     return channel as { id: string; name: string }
