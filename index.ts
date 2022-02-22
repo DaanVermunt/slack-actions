@@ -3,18 +3,11 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
-    console.log('FIND CHANNEL')
-    try {
-        console.log(await client.conversations.list())
-    } catch (e) {
-        console.error(e)
-    }
-    const listChannelResponse = await client.conversations.list({ limit: 1000 })
-    console.log(listChannelResponse)
+    const listChannelResponse = await client.conversations.list()
     const channels = listChannelResponse.channels as { id: string, name: string }[]
-    console.log(channels)
     const channel = channels.find(ch => ch.name === name)
 
+    console.log(channel)
     return channel as { id: string; name: string }
 }
 
@@ -110,13 +103,9 @@ const postMessages = async (messages: string[], client: any, channel: { id: stri
 }
 
 const run = async () => {
-    console.log('START')
     const actionType = core.getInput('action-type')
-    console.log(actionType)
     const botOAuthSecret = core.getInput('bot-oauth-secret')
-    console.log('secret found')
     const userIds = core.getInput('slack-user-ids') || ''
-    console.log(userIds)
 
     const githubToken = core.getInput('github-token')
     const payload = github.context.payload
@@ -128,9 +117,7 @@ const run = async () => {
     }
 
     const prNum = payload.number
-    console.log(prNum)
     const slackClient = new WebClient(botOAuthSecret)
-    console.log(slackClient)
 
     switch (actionType) {
         case 'PR_OPEN':

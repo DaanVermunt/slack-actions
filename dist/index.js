@@ -13950,18 +13950,10 @@ const web_api_1 = __webpack_require__(431);
 const core = __webpack_require__(2186);
 const github = __webpack_require__(5438);
 const findChannel = async (client, name) => {
-    console.log('FIND CHANNEL');
-    try {
-        console.log(await client.conversations.list());
-    }
-    catch (e) {
-        console.error(e);
-    }
-    const listChannelResponse = await client.conversations.list({ limit: 1000 });
-    console.log(listChannelResponse);
+    const listChannelResponse = await client.conversations.list();
     const channels = listChannelResponse.channels;
-    console.log(channels);
     const channel = channels.find(ch => ch.name === name);
+    console.log(channel);
     return channel;
 };
 const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'DEPLOY_STAGING', 'DEPLOY_PRODUCTION'];
@@ -14023,13 +14015,9 @@ const postMessages = async (messages, client, channel) => {
 };
 const run = async () => {
     var _a, _b, _c, _d;
-    console.log('START');
     const actionType = core.getInput('action-type');
-    console.log(actionType);
     const botOAuthSecret = core.getInput('bot-oauth-secret');
-    console.log('secret found');
     const userIds = core.getInput('slack-user-ids') || '';
-    console.log(userIds);
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
@@ -14038,9 +14026,7 @@ const run = async () => {
         return;
     }
     const prNum = payload.number;
-    console.log(prNum);
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
-    console.log(slackClient);
     switch (actionType) {
         case 'PR_OPEN':
             const channelName = await getPRdata(octo, payload);
