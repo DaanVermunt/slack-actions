@@ -2,14 +2,16 @@ import { WebClient } from '@slack/web-api'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-const findChannel = async (client: WebClient, name: string) => {
+const findChannel = async (client: WebClient, name: string, cursor?: string) => {
     console.log("----CONV----")
-    console.log(await client.conversations.list())
-    const listChannelResponse = await client.conversations.list()
+    const listChannelResponse = await client.conversations.list({limit: 200, cursor})
+    console.log(listChannelResponse)
     const channels = listChannelResponse.channels as { id: string, name: string }[]
     const channel = channels.find(ch => ch.name === name)
+    if(!channel) {
+        return findChannel(client, name, listChannelResponse.response_metadata.next_cursor)
+    }
 
-    console.log(channel)
     return channel as { id: string; name: string }
 }
 
