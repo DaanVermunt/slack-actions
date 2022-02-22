@@ -13950,8 +13950,7 @@ const web_api_1 = __webpack_require__(431);
 const core = __webpack_require__(2186);
 const github = __webpack_require__(5438);
 const findChannel = async (client, name) => {
-    const respones = await client.conversations.list();
-    console.log(respones);
+    console.log(await client.conversations.list());
     const listChannelResponse = await client.conversations.list();
     const channels = listChannelResponse.channels;
     const channel = channels.find(ch => ch.name === name);
