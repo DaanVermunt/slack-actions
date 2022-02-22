@@ -23,8 +23,8 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "@slack/events-api": "^3.0.0",
-    "@slack/web-api": "^6.1.0",
+    "@slack/events-api": "^3.0.1",
+    "@slack/web-api": "^6.6.0",
     "moment": "^2.29.1"
   },
   "devDependencies": {
