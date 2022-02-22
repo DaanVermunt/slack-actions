@@ -14548,9 +14548,7 @@ const web_api_1 = __webpack_require__(431);
 const core = __webpack_require__(2186);
 const github = __webpack_require__(5438);
 const findChannel = async (client, name, cursor) => {
-    console.log("----CONV----");
     const listChannelResponse = await client.conversations.list({ limit: 200, cursor });
-    console.log(listChannelResponse);
     const channels = listChannelResponse.channels;
     const channel = channels.find(ch => ch.name === name);
     if (!channel) {
@@ -14612,6 +14610,13 @@ const postMessages = async (messages, client, channel) => {
                     text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
                 }
             },
+            ...messages.map(m => ({
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `- ${m}`,
+                },
+            })),
         ],
     });
 };
@@ -14689,7 +14694,6 @@ const run = async () => {
 run()
     .then(() => core.setOutput('my_feelings', 'YEAH'))
     .catch((error) => {
-    console.error(error);
     return core.setFailed(error.message);
 });
 

@@ -3,9 +3,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string, cursor?: string) => {
-    console.log("----CONV----")
     const listChannelResponse = await client.conversations.list({limit: 200, cursor})
-    console.log(listChannelResponse)
     const channels = listChannelResponse.channels as { id: string, name: string }[]
     const channel = channels.find(ch => ch.name === name)
     if(!channel) {
@@ -95,13 +93,13 @@ const postMessages = async (messages: string[], client: any, channel: { id: stri
                     text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
                 }
             },
-            // ...messages.map(m => ({
-            //     type: 'section',
-            //     text: {
-            //         type: 'mrkdwn',
-            //         text: `- ${m}`,
-            //     },
-            // })),
+            ...messages.map(m => ({
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `- ${m}`,
+                },
+            })),
         ],
     })
 }
@@ -192,6 +190,5 @@ const run = async () => {
 run()
     .then(() => core.setOutput('my_feelings', 'YEAH'))
     .catch((error) => {
-        console.error(error)
         return core.setFailed(error.message)
     })
