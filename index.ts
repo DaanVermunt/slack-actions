@@ -4,7 +4,8 @@ import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
     console.log('FIND CHANNEL')
-    const listChannelResponse = await client.conversations.list({limit: 1000})
+    console.log(await client.conversations.list())
+    const listChannelResponse = await client.conversations.list({ limit: 1000 })
     console.log(listChannelResponse)
     const channels = listChannelResponse.channels as { id: string, name: string }[]
     console.log(channels)
