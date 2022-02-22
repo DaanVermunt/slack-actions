@@ -102,9 +102,13 @@ const postMessages = async (messages: string[], client: any, channel: { id: stri
 }
 
 const run = async () => {
+    console.log('START')
     const actionType = core.getInput('action-type')
+    console.log(actionType)
     const botOAuthSecret = core.getInput('bot-oauth-secret')
+    console.log('secret found')
     const userIds = core.getInput('slack-user-ids') || ''
+    console.log(userIds)
 
     const githubToken = core.getInput('github-token')
     const payload = github.context.payload
@@ -116,7 +120,9 @@ const run = async () => {
     }
 
     const prNum = payload.number
+    console.log(prNum)
     const slackClient = new WebClient(botOAuthSecret)
+    console.log('slack client init')
 
     switch (actionType) {
         case 'PR_OPEN':
@@ -164,9 +170,13 @@ const run = async () => {
                 return
             }
             const messages = await getCommitMessages(octo, payload)
+            console.log(messages)
             const messagesToSend = getMessagesToSend(messages)
+            console.log(messagesToSend)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
+            console.log(deployStaging)
             await postMessages(messagesToSend, slackClient, deployStaging)
+            console.log('message posted')
             break
 
         case 'DEPLOY_PRODUCTION':

@@ -14021,9 +14021,13 @@ const postMessages = async (messages, client, channel) => {
 };
 const run = async () => {
     var _a, _b, _c, _d;
+    console.log('START');
     const actionType = core.getInput('action-type');
+    console.log(actionType);
     const botOAuthSecret = core.getInput('bot-oauth-secret');
+    console.log('secret found');
     const userIds = core.getInput('slack-user-ids') || '';
+    console.log(userIds);
     const githubToken = core.getInput('github-token');
     const payload = github.context.payload;
     const octo = github.getOctokit(githubToken);
@@ -14032,7 +14036,9 @@ const run = async () => {
         return;
     }
     const prNum = payload.number;
+    console.log(prNum);
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
+    console.log('slack client init');
     switch (actionType) {
         case 'PR_OPEN':
             const channelName = await getPRdata(octo, payload);
@@ -14075,9 +14081,13 @@ const run = async () => {
                 return;
             }
             const messages = await getCommitMessages(octo, payload);
+            console.log(messages);
             const messagesToSend = getMessagesToSend(messages);
+            console.log(messagesToSend);
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
+            console.log(deployStaging);
             await postMessages(messagesToSend, slackClient, deployStaging);
+            console.log('message posted');
             break;
         case 'DEPLOY_PRODUCTION':
             if (!isLastDeploy((_d = (_c = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.message)) {
