@@ -122,7 +122,7 @@ const run = async () => {
     const prNum = payload.number
     console.log(prNum)
     const slackClient = new WebClient(botOAuthSecret)
-    console.log('slack client init')
+    console.log(slackClient)
 
     switch (actionType) {
         case 'PR_OPEN':

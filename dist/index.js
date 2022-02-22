@@ -14031,7 +14031,7 @@ const run = async () => {
     const prNum = payload.number;
     console.log(prNum);
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
-    console.log('slack client init');
+    console.log(slackClient);
     switch (actionType) {
         case 'PR_OPEN':
             const channelName = await getPRdata(octo, payload);
