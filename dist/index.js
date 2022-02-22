@@ -14009,13 +14009,6 @@ const postMessages = async (messages, client, channel) => {
                     text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
                 }
             },
-            ...messages.map(m => ({
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `- ${m}`,
-                },
-            })),
         ],
     });
 };

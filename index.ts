@@ -90,13 +90,13 @@ const postMessages = async (messages: string[], client: any, channel: { id: stri
                     text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
                 }
             },
-            ...messages.map(m => ({
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `- ${m}`,
-                },
-            })),
+            // ...messages.map(m => ({
+            //     type: 'section',
+            //     text: {
+            //         type: 'mrkdwn',
+            //         text: `- ${m}`,
+            //     },
+            // })),
         ],
     })
 }
