@@ -13987,7 +13987,7 @@ const getMessagesToSend = (messages, lookForLastDeploy = false) => {
 };
 const isBumpVersion = (message) => {
     if (typeof message === 'string') {
-        return message.toLowerCase().includes('bump version');
+        return message.toLowerCase().includes('bump version') || message.toLowerCase().includes('updated version');
     }
     return false;
 };
