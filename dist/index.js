@@ -13951,7 +13951,12 @@ const core = __webpack_require__(2186);
 const github = __webpack_require__(5438);
 const findChannel = async (client, name) => {
     console.log('FIND CHANNEL');
-    console.log(await client.conversations.list());
+    try {
+        console.log(await client.conversations.list());
+    }
+    catch (e) {
+        console.error(e);
+    }
     const listChannelResponse = await client.conversations.list({ limit: 1000 });
     console.log(listChannelResponse);
     const channels = listChannelResponse.channels;
