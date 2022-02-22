@@ -174,7 +174,7 @@ const run = async () => {
             const messagesToSend = getMessagesToSend(messages)
             console.log(messagesToSend)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
-            console.log(deployStaging)
+            console.log('channel found')
             await postMessages(messagesToSend, slackClient, deployStaging)
             console.log('message posted')
             break
