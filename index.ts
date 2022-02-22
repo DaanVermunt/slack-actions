@@ -194,5 +194,5 @@ run()
     .then(() => core.setOutput('my_feelings', 'YEAH'))
     .catch((error) => {
         console.error(error)
-        core.setFailed(error.message)
+        return core.setFailed(error.message)
     })
