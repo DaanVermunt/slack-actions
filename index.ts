@@ -3,6 +3,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 
 const findChannel = async (client: WebClient, name: string) => {
+    console.log("----CONV----")
     console.log(await client.conversations.list())
     const listChannelResponse = await client.conversations.list()
     const channels = listChannelResponse.channels as { id: string, name: string }[]
@@ -166,13 +167,9 @@ const run = async () => {
                 return
             }
             const messages = await getCommitMessages(octo, payload)
-            console.log(messages)
             const messagesToSend = getMessagesToSend(messages)
-            console.log(messagesToSend)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
-            console.log('channel found')
             await postMessages(messagesToSend, slackClient, deployStaging)
-            console.log('message posted')
             break
 
         case 'DEPLOY_PRODUCTION':

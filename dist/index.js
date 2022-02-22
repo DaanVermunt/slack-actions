@@ -13950,6 +13950,7 @@ const web_api_1 = __webpack_require__(431);
 const core = __webpack_require__(2186);
 const github = __webpack_require__(5438);
 const findChannel = async (client, name) => {
+    console.log("----CONV----");
     console.log(await client.conversations.list());
     const listChannelResponse = await client.conversations.list();
     const channels = listChannelResponse.channels;
@@ -14070,13 +14071,9 @@ const run = async () => {
                 return;
             }
             const messages = await getCommitMessages(octo, payload);
-            console.log(messages);
             const messagesToSend = getMessagesToSend(messages);
-            console.log(messagesToSend);
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
-            console.log('channel found');
             await postMessages(messagesToSend, slackClient, deployStaging);
-            console.log('message posted');
             break;
         case 'DEPLOY_PRODUCTION':
             if (!isLastDeploy((_d = (_c = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.message)) {
