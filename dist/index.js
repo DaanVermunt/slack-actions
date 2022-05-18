@@ -14659,7 +14659,7 @@ const run = async () => {
                         type: 'section',
                         text: {
                             type: 'mrkdwn',
-                            text: `Post \`/github subscribe ${payload.repository.full_name} comments +label:${prNum}\` in order to get comment messages`,
+                            text: `Go to https://github.com/${payload.repository.full_name}/pull/${prNum} to view the pull request.`,
                         },
                     }],
             });
