@@ -58,27 +58,13 @@ const getCommitMessages = async (octo: any, payload: any): Promise<string[]> => 
     return commits.data.map(com => com.commit.message)
 }
 
-const getMessagesToSend = (messages: string[], lookForLastDeploy = false) => {
+const getMessagesToSend = (messages: string[], production: boolean) => {
     // REMOVE FIRST (WHICH IS BUMP)
     const items = messages.slice(1)
-    const nextIdx = items.findIndex((m) => lookForLastDeploy ? isLastDeploy(m) : isBumpVersion(m))
+    const nextIdx = items.findIndex((m) => m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging')))
 
     // THEN CREATE LIST UP TO NEXT BUMP
     return items.slice(0, nextIdx)
-}
-
-const isBumpVersion = (message: any) => {
-    if (typeof message === 'string') {
-        return message.toLowerCase().includes('bump version') || message.toLowerCase().includes('updated version')
-    }
-    return false
-}
-
-const isLastDeploy = (message: any) => {
-    if (typeof message === 'string') {
-        return message.toLowerCase().includes('set last deploy')
-    }
-    return false
 }
 
 const postMessages = async (messages: string[], client: any, channel: { id: string; name: string }) => {
@@ -163,23 +149,16 @@ const run = async () => {
             break
 
         case 'DEPLOY_STAGING':
-            if (!isBumpVersion(payload?.commits?.[0]?.message)) {
-                return
-            }
             const messages = await getCommitMessages(octo, payload)
-            const messagesToSend = getMessagesToSend(messages)
+            const messagesToSend = getMessagesToSend(messages, false)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
+
             await postMessages(messagesToSend, slackClient, deployStaging)
             break
 
         case 'DEPLOY_PRODUCTION':
-            if (!isLastDeploy(payload?.commits?.[0]?.message)) {
-                return
-            }
-
             const messagesProd = await getCommitMessages(octo, payload)
             const messagesToSendProd = getMessagesToSend(messagesProd, true)
-
             const deployStagingProd = await findChannel(slackClient, 'keywi-deployments')
 
             await postMessages(messagesToSendProd, slackClient, deployStagingProd)
