@@ -61,7 +61,11 @@ const getCommitMessages = async (octo: any, payload: any): Promise<string[]> => 
 const getMessagesToSend = (messages: string[], production: boolean) => {
     // REMOVE FIRST (WHICH IS BUMP)
     const items = messages.slice(1)
-    const nextIdx = items.findIndex((m) => m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging')))
+    const nextIdx = items.findIndex((m) => {
+        const res = m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging'))
+        console.log(m, res)
+        return res
+    })
 
     // THEN CREATE LIST UP TO NEXT BUMP
     return items.slice(0, nextIdx)
@@ -150,6 +154,7 @@ const run = async () => {
 
         case 'DEPLOY_STAGING':
             const messages = await getCommitMessages(octo, payload)
+            console.log(messages)
             const messagesToSend = getMessagesToSend(messages, false)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
 
