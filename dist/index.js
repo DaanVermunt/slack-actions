@@ -14581,22 +14581,10 @@ const getCommitMessages = async (octo, payload) => {
     });
     return commits.data.map(com => com.commit.message);
 };
-const getMessagesToSend = (messages, lookForLastDeploy = false) => {
+const getMessagesToSend = (messages, production) => {
     const items = messages.slice(1);
-    const nextIdx = items.findIndex((m) => lookForLastDeploy ? isLastDeploy(m) : isBumpVersion(m));
+    const nextIdx = items.findIndex((m) => m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging')));
     return items.slice(0, nextIdx);
-};
-const isBumpVersion = (message) => {
-    if (typeof message === 'string') {
-        return message.toLowerCase().includes('bump version') || message.toLowerCase().includes('updated version');
-    }
-    return false;
-};
-const isLastDeploy = (message) => {
-    if (typeof message === 'string') {
-        return message.toLowerCase().includes('set last deploy');
-    }
-    return false;
 };
 const postMessages = async (messages, client, channel) => {
     await client.chat.postMessage({
@@ -14621,7 +14609,6 @@ const postMessages = async (messages, client, channel) => {
     });
 };
 const run = async () => {
-    var _a, _b, _c, _d;
     const actionType = core.getInput('action-type');
     const botOAuthSecret = core.getInput('bot-oauth-secret');
     const userIds = core.getInput('slack-user-ids') || '';
@@ -14672,18 +14659,12 @@ const run = async () => {
             });
             break;
         case 'DEPLOY_STAGING':
-            if (!isBumpVersion((_b = (_a = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.message)) {
-                return;
-            }
             const messages = await getCommitMessages(octo, payload);
-            const messagesToSend = getMessagesToSend(messages);
+            const messagesToSend = getMessagesToSend(messages, false);
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
             await postMessages(messagesToSend, slackClient, deployStaging);
             break;
         case 'DEPLOY_PRODUCTION':
-            if (!isLastDeploy((_d = (_c = payload === null || payload === void 0 ? void 0 : payload.commits) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.message)) {
-                return;
-            }
             const messagesProd = await getCommitMessages(octo, payload);
             const messagesToSendProd = getMessagesToSend(messagesProd, true);
             const deployStagingProd = await findChannel(slackClient, 'keywi-deployments');
