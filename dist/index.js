@@ -14583,12 +14583,8 @@ const getCommitMessages = async (octo, payload) => {
 };
 const getMessagesToSend = (messages, production) => {
     const items = messages.slice(1);
-    const nextIdx = items.findIndex((m) => {
-        const res = m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging'));
-        console.log(m, res);
-        return res;
-    });
-    return items.slice(0, nextIdx);
+    const nextIdx = items.findIndex((m) => m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging')));
+    return items.slice(0, nextIdx).filter(m => !m.startsWith('PUSH'));
 };
 const postMessages = async (messages, client, channel) => {
     await client.chat.postMessage({
@@ -14664,7 +14660,6 @@ const run = async () => {
             break;
         case 'DEPLOY_STAGING':
             const messages = await getCommitMessages(octo, payload);
-            console.log(messages);
             const messagesToSend = getMessagesToSend(messages, false);
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging');
             await postMessages(messagesToSend, slackClient, deployStaging);
