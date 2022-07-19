@@ -105,13 +105,13 @@ const postSingleMessage = async (client: WebClient, channelId: string, message: 
 }
 
 const getReviewPrefix =  (payload: WebhookPayload): string => {
-    const state = payload.review.state as 'changes_requested' | 'comment' | 'approved'
+    const state = payload.review.state as 'changes_requested' | 'commented' | 'approved'
     switch (state) {
         case 'changes_requested':
             return ':x: Changes requested'
         case 'approved':
             return ':white_check_mark: Approved'
-        case 'comment':
+        case 'commented':
             return ':speed_balloon: Approved'
     }
     return `:question: Reviewed with unknown status ${state}`
