@@ -1,3 +1,4 @@
+import { WebhookPayload } from '@actions/github/lib/interfaces'
 import { WebClient } from '@slack/web-api'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
@@ -20,7 +21,7 @@ const isActionType = (str: string): str is ActionType => {
     return ActionTypes.some(val => val === str)
 }
 
-const getPRdata = async (octo: any, payload: any) => {
+const getChannelName = async (octo: any, payload: any) => {
     const prNum = payload.number
     const getPROptions = {
         owner: payload.repository.owner.login,
@@ -67,7 +68,7 @@ const getMessagesToSend = (messages: string[], production: boolean) => {
     return items.slice(0, nextIdx).filter(m => !m.startsWith('PUSH'))
 }
 
-const postMessages = async (messages: string[], client: any, channel: { id: string; name: string }) => {
+const postDeployMessages = async (messages: string[], client: any, channel: { id: string; name: string }) => {
     await client.chat.postMessage({
         channel: channel.id,
         text: '',
@@ -90,6 +91,34 @@ const postMessages = async (messages: string[], client: any, channel: { id: stri
     })
 }
 
+const postSingleMessage = async (client: WebClient, channelId: string, message: string) => {
+    return await client.chat.postMessage({
+        channel: channelId,
+        text: '',
+        blocks: [{
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: message,
+            },
+        }],
+    })
+}
+
+const getReviewedMessage = (payload: WebhookPayload): string => {
+    // TODO CHECK comment and approved
+    const state = payload.review.state as 'changes_requested' | 'comment' | 'approved'
+    switch (state) {
+        case 'changes_requested':
+            return `:x: Changes requested${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+        case 'approved':
+            return `:white_check_mark: Approved${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+        case 'comment':
+            return `:speed_balloon: Approved${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+    }
+    return `:question: Reviewed with unknown status ${state}${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+}
+
 const run = async () => {
     const actionType = core.getInput('action-type')
     const botOAuthSecret = core.getInput('bot-oauth-secret')
@@ -108,8 +137,8 @@ const run = async () => {
     const slackClient = new WebClient(botOAuthSecret)
 
     switch (actionType) {
-        case 'PR_OPEN':
-            const channelName = await getPRdata(octo, payload)
+        case 'PR_OPEN': {
+            const channelName = await getChannelName(octo, payload)
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
@@ -127,37 +156,35 @@ const run = async () => {
                 channel: newChannel.id,
                 users: userIds,
             })
-            await slackClient.chat.postMessage({
-                channel: newChannel.id,
-                text: '',
-                blocks: [{
-                    type: 'section',
-                    text: {
-                        type: 'mrkdwn',
-                        text: `Go to https://github.com/${payload.repository.full_name}/pull/${prNum} to view the pull request.`,
-                    },
-                }],
-            })
+            await postSingleMessage(slackClient, newChannel.id, `Go to https://github.com/${payload.repository.full_name}/pull/${prNum} to view the pull request.`)
 
             break
-        case 'PR_CLOSED':
-            const channelName2 = await getPRdata(octo, payload)
-            const channel = await findChannel(slackClient, channelName2)
+
+        }
+        case 'PR_CLOSED': {
+            const channelName = await getChannelName(octo, payload)
+            const channel = await findChannel(slackClient, channelName)
             await slackClient.conversations.archive({
                 channel: channel.id,
             })
             break
+        }
 
-        case 'PR_REVIEWED':
-            console.log(payload)
+        case 'PR_REVIEWED': {
+            const channelName = await getChannelName(octo, payload)
+            const message = getReviewedMessage(payload)
+            const channel = await findChannel(slackClient, channelName)
+            await postSingleMessage(slackClient, channel.id, message)
             break
+
+        }
 
         case 'DEPLOY_STAGING':
             const messages = await getCommitMessages(octo, payload)
             const messagesToSend = getMessagesToSend(messages, false)
             const deployStaging = await findChannel(slackClient, 'keywi-deployments-staging')
 
-            await postMessages(messagesToSend, slackClient, deployStaging)
+            await postDeployMessages(messagesToSend, slackClient, deployStaging)
             break
 
         case 'DEPLOY_PRODUCTION':
@@ -165,7 +192,7 @@ const run = async () => {
             const messagesToSendProd = getMessagesToSend(messagesProd, true)
             const deployStagingProd = await findChannel(slackClient, 'keywi-deployments')
 
-            await postMessages(messagesToSendProd, slackClient, deployStagingProd)
+            await postDeployMessages(messagesToSendProd, slackClient, deployStagingProd)
             break
 
     }
