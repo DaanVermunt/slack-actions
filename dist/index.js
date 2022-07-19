@@ -14621,18 +14621,24 @@ const postSingleMessage = async (client, channelId, message) => {
             }],
     });
 };
-const getReviewedMessage = (payload) => {
-    var _a, _b, _c, _d;
+const getReviewPrefix = (payload) => {
     const state = payload.review.state;
     switch (state) {
         case 'changes_requested':
-            return `:x: Changes requested${((_a = payload.review.body) === null || _a === void 0 ? void 0 : _a.length) > 0 ? ' : ' + payload.review.body : ''}`;
+            return ':x: Changes requested';
         case 'approved':
-            return `:white_check_mark: Approved${((_b = payload.review.body) === null || _b === void 0 ? void 0 : _b.length) > 0 ? ' : ' + payload.review.body : ''}`;
+            return ':white_check_mark: Approved';
         case 'comment':
-            return `:speed_balloon: Approved${((_c = payload.review.body) === null || _c === void 0 ? void 0 : _c.length) > 0 ? ' : ' + payload.review.body : ''}`;
+            return ':speed_balloon: Approved';
     }
-    return `:question: Reviewed with unknown status ${state}${((_d = payload.review.body) === null || _d === void 0 ? void 0 : _d.length) > 0 ? ' : ' + payload.review.body : ''}`;
+    return `:question: Reviewed with unknown status ${state}`;
+};
+const getReviewedMessage = (payload) => {
+    var _a;
+    const prefix = getReviewPrefix(payload);
+    const user = payload.review.user.login;
+    const body = ((_a = payload.review.body) === null || _a === void 0 ? void 0 : _a.length) > 0 ? ' : ' + payload.review.body : '';
+    return `${prefix} by ${user}${body}`;
 };
 const run = async () => {
     const actionType = core.getInput('action-type');

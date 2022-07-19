@@ -105,18 +105,25 @@ const postSingleMessage = async (client: WebClient, channelId: string, message: 
     })
 }
 
-const getReviewedMessage = (payload: WebhookPayload): string => {
-    // TODO CHECK comment and approved
+const getReviewPrefix =  (payload: WebhookPayload): string => {
     const state = payload.review.state as 'changes_requested' | 'comment' | 'approved'
     switch (state) {
         case 'changes_requested':
-            return `:x: Changes requested${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+            return ':x: Changes requested'
         case 'approved':
-            return `:white_check_mark: Approved${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+            return ':white_check_mark: Approved'
         case 'comment':
-            return `:speed_balloon: Approved${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+            return ':speed_balloon: Approved'
     }
-    return `:question: Reviewed with unknown status ${state}${payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''}`
+    return `:question: Reviewed with unknown status ${state}`
+}
+
+const getReviewedMessage = (payload: WebhookPayload): string => {
+    // TODO CHECK comment and approved
+    const prefix = getReviewPrefix(payload)
+    const user = payload.review.user.login
+    const body = payload.review.body?.length > 0 ? ' : ' + payload.review.body : ''
+    return `${prefix} by ${user}${body}`
 }
 
 const run = async () => {
