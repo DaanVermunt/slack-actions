@@ -13,7 +13,7 @@ const findChannel = async (client: WebClient, name: string, cursor?: string) => 
     return channel as { id: string; name: string }
 }
 
-const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'DEPLOY_STAGING', 'DEPLOY_PRODUCTION'] as const
+const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'PR_REVIEWED', 'DEPLOY_STAGING', 'DEPLOY_PRODUCTION'] as const
 type ActionType = typeof ActionTypes[number]
 
 const isActionType = (str: string): str is ActionType => {
@@ -148,6 +148,10 @@ const run = async () => {
             })
             break
 
+        case 'PR_REVIEWED':
+            console.log(payload)
+            break
+
         case 'DEPLOY_STAGING':
             const messages = await getCommitMessages(octo, payload)
             const messagesToSend = getMessagesToSend(messages, false)
@@ -163,6 +167,7 @@ const run = async () => {
 
             await postMessages(messagesToSendProd, slackClient, deployStagingProd)
             break
+
     }
 }
 

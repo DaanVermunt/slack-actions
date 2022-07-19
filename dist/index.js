@@ -14556,7 +14556,7 @@ const findChannel = async (client, name, cursor) => {
     }
     return channel;
 };
-const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'DEPLOY_STAGING', 'DEPLOY_PRODUCTION'];
+const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'PR_REVIEWED', 'DEPLOY_STAGING', 'DEPLOY_PRODUCTION'];
 const isActionType = (str) => {
     return ActionTypes.some(val => val === str);
 };
@@ -14657,6 +14657,9 @@ const run = async () => {
             await slackClient.conversations.archive({
                 channel: channel.id,
             });
+            break;
+        case 'PR_REVIEWED':
+            console.log(payload);
             break;
         case 'DEPLOY_STAGING':
             const messages = await getCommitMessages(octo, payload);
