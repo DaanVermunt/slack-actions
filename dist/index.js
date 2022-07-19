@@ -14560,8 +14560,7 @@ const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'PR_REVIEWED', 'DEPLOY_STAGING', 'D
 const isActionType = (str) => {
     return ActionTypes.some(val => val === str);
 };
-const getChannelName = async (octo, payload) => {
-    const prNum = payload.number;
+const getChannelName = async (octo, payload, prNum) => {
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
@@ -14655,7 +14654,7 @@ const run = async () => {
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN': {
-            const channelName = await getChannelName(octo, payload);
+            const channelName = await getChannelName(octo, payload, payload.number);
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
@@ -14675,7 +14674,7 @@ const run = async () => {
             break;
         }
         case 'PR_CLOSED': {
-            const channelName = await getChannelName(octo, payload);
+            const channelName = await getChannelName(octo, payload, payload.number);
             const channel = await findChannel(slackClient, channelName);
             await slackClient.conversations.archive({
                 channel: channel.id,
@@ -14684,7 +14683,7 @@ const run = async () => {
         }
         case 'PR_REVIEWED': {
             console.log(payload);
-            const channelName = await getChannelName(octo, payload);
+            const channelName = await getChannelName(octo, payload, payload.pull_request.number);
             console.log(channelName);
             const message = getReviewedMessage(payload);
             console.log(message);
