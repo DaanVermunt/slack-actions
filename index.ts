@@ -178,9 +178,13 @@ const run = async () => {
         }
 
         case 'PR_REVIEWED': {
+            console.log(payload)
             const channelName = await getChannelName(octo, payload)
+            console.log(channelName)
             const message = getReviewedMessage(payload)
+            console.log(message)
             const channel = await findChannel(slackClient, channelName)
+            console.log(channel.id)
             await postSingleMessage(slackClient, channel.id, message)
             break
 
