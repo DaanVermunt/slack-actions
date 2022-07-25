@@ -14628,7 +14628,7 @@ const getReviewPrefix = (payload) => {
         case 'approved':
             return ':white_check_mark: Approved';
         case 'commented':
-            return ':speed_balloon: Approved';
+            return ':speech_balloon: Commented';
     }
     return `:question: Reviewed with unknown status ${state}`;
 };
