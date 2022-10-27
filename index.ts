@@ -169,7 +169,7 @@ const run = async () => {
 
         }
         case 'PR_CLOSED': {
-            const channelName = await getChannelName(octo, payload, payload.number)
+            const channelName = await getChannelName(octo, payload, payload.number, channel_prefix)
             const channel = await findChannel(slackClient, channelName)
             await slackClient.conversations.archive({
                 channel: channel.id,
@@ -179,7 +179,7 @@ const run = async () => {
 
         case 'PR_REVIEWED': {
             console.log(payload)
-            const channelName = await getChannelName(octo, payload, payload.pull_request.number)
+            const channelName = await getChannelName(octo, payload, payload.pull_request.number, channel_prefix)
             console.log(channelName)
             const message = getReviewedMessage(payload)
             console.log(message)

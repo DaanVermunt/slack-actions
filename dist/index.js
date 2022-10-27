@@ -14560,7 +14560,7 @@ const ActionTypes = ['PR_OPEN', 'PR_CLOSED', 'PR_REVIEWED', 'DEPLOY_STAGING', 'D
 const isActionType = (str) => {
     return ActionTypes.some(val => val === str);
 };
-const getChannelName = async (octo, payload, prNum) => {
+const getChannelName = async (octo, payload, prNum, channel_prefix) => {
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
@@ -14569,7 +14569,7 @@ const getChannelName = async (octo, payload, prNum) => {
     const PR = await octo.pulls.get(getPROptions);
     const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase();
     const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase();
-    return `pr_${prNum}_${head}_${base}`;
+    return `${channel_prefix}_${prNum}_${head}_${base}`;
 };
 const getCommitMessages = async (octo, payload) => {
     const commits = await octo.request('GET /repos/{owner}/{repo}/commits', {
@@ -14641,6 +14641,7 @@ const getReviewedMessage = (payload) => {
 };
 const run = async () => {
     const actionType = core.getInput('action-type');
+    const channel_prefix = core.getInput('channel_prefix') || 'pr';
     const botOAuthSecret = core.getInput('bot-oauth-secret');
     const userIds = core.getInput('slack-user-ids') || '';
     const githubToken = core.getInput('github-token');
@@ -14654,7 +14655,7 @@ const run = async () => {
     const slackClient = new web_api_1.WebClient(botOAuthSecret);
     switch (actionType) {
         case 'PR_OPEN': {
-            const channelName = await getChannelName(octo, payload, payload.number);
+            const channelName = await getChannelName(octo, payload, payload.number, channel_prefix);
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
@@ -14674,7 +14675,7 @@ const run = async () => {
             break;
         }
         case 'PR_CLOSED': {
-            const channelName = await getChannelName(octo, payload, payload.number);
+            const channelName = await getChannelName(octo, payload, payload.number, channel_prefix);
             const channel = await findChannel(slackClient, channelName);
             await slackClient.conversations.archive({
                 channel: channel.id,
@@ -14683,7 +14684,7 @@ const run = async () => {
         }
         case 'PR_REVIEWED': {
             console.log(payload);
-            const channelName = await getChannelName(octo, payload, payload.pull_request.number);
+            const channelName = await getChannelName(octo, payload, payload.pull_request.number, channel_prefix);
             console.log(channelName);
             const message = getReviewedMessage(payload);
             console.log(message);
