@@ -21,7 +21,7 @@ const isActionType = (str: string): str is ActionType => {
     return ActionTypes.some(val => val === str)
 }
 
-const getChannelName = async (octo: any, payload: any, prNum: number) => {
+const getChannelName = async (octo: any, payload: any, prNum: number, channel_prefix) => {
     const getPROptions = {
         owner: payload.repository.owner.login,
         repo: payload.repository.name,
@@ -31,7 +31,7 @@ const getChannelName = async (octo: any, payload: any, prNum: number) => {
 
     const base = PR.data.base.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
     const head = PR.data.head.ref.replace(/[^0-9a-zA-z -]/g, '').replace(/ +/g, '-').toLowerCase()
-    return `pr_${prNum}_${head}_${base}`
+    return `${channel_prefix}_${prNum}_${head}_${base}`
 }
 
 interface Commit {
@@ -127,6 +127,7 @@ const getReviewedMessage = (payload: WebhookPayload): string => {
 
 const run = async () => {
     const actionType = core.getInput('action-type')
+    const channel_prefix = core.getInput('channel_prefix') || 'pr'
     const botOAuthSecret = core.getInput('bot-oauth-secret')
     const userIds = core.getInput('slack-user-ids') || ''
 
@@ -144,7 +145,7 @@ const run = async () => {
 
     switch (actionType) {
         case 'PR_OPEN': {
-            const channelName = await getChannelName(octo, payload, payload.number)
+            const channelName = await getChannelName(octo, payload, payload.number, channel_prefix)
             await octo.issues.addLabels({
                 owner: payload.repository.owner.login,
                 repo: payload.repository.name,
