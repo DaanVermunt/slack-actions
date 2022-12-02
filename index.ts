@@ -67,7 +67,36 @@ const getMessagesToSend = (messages: string[], production: boolean) => {
     return items.slice(0, nextIdx).filter(m => !m.startsWith('PUSH'))
 }
 
+const mapMessage = (message: string): any => {
+    return {
+        type: 'section',
+        text: {
+            type: 'mrkdwn',
+            text: `- ${message}`,
+        },
+    }
+}
+
+const mapActionMessage = (message: string): any => {
+    return {
+        type: 'section',
+        text: {
+            type: 'mrkdwn',
+            text: `:warning: ${message} :warning:`
+        }
+    }
+}
+
+const actionIntro = {
+    type: 'section',
+    text: {
+        type: 'mrkdwn',
+        text: ':warning: :warning: :warning: ACTION REQUIRED :warning: :warning: :warning:'
+    }
+}
+
 const postDeployMessages = async (messages: string[], client: any, channel: { id: string; name: string }) => {
+    const actionMessages = messages.filter(message => message.startsWith('ACTION'))
     await client.chat.postMessage({
         channel: channel.id,
         text: '',
@@ -79,13 +108,9 @@ const postDeployMessages = async (messages: string[], client: any, channel: { id
                     text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
                 }
             },
-            ...messages.map(m => ({
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `- ${m}`,
-                },
-            })),
+            ...messages.map(mapMessage),
+            ...(actionMessages.length > 0 ? [actionIntro] : []),
+            ...actionMessages.map(mapActionMessage)
         ],
     })
 }
