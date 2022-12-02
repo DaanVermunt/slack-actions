@@ -14585,7 +14585,33 @@ const getMessagesToSend = (messages, production) => {
     const nextIdx = items.findIndex((m) => m.startsWith('PUSH') && (production ? m.endsWith('production') : m.endsWith('staging')));
     return items.slice(0, nextIdx).filter(m => !m.startsWith('PUSH'));
 };
+const mapMessage = (message) => {
+    return {
+        type: 'section',
+        text: {
+            type: 'mrkdwn',
+            text: `- ${message}`,
+        },
+    };
+};
+const mapActionMessage = (message) => {
+    return {
+        type: 'section',
+        text: {
+            type: 'mrkdwn',
+            text: `:warning: ${message} :warning:`
+        }
+    };
+};
+const actionIntro = {
+    type: 'section',
+    text: {
+        type: 'mrkdwn',
+        text: ':warning: :warning: :warning: ACTION REQUIRED :warning: :warning: :warning:'
+    }
+};
 const postDeployMessages = async (messages, client, channel) => {
+    const actionMessages = messages.filter(message => message.startsWith('ACTION'));
     await client.chat.postMessage({
         channel: channel.id,
         text: '',
@@ -14597,13 +14623,9 @@ const postDeployMessages = async (messages, client, channel) => {
                     text: '🚀 NEW DEPLOYMENT 🎉🎉🎉 \nNew features: ',
                 }
             },
-            ...messages.map(m => ({
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `- ${m}`,
-                },
-            })),
+            ...messages.map(mapMessage),
+            ...(actionMessages.length > 0 ? [actionIntro] : []),
+            ...actionMessages.map(mapActionMessage)
         ],
     });
 };
